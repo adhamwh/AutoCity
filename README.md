@@ -1,4 +1,4 @@
-# AutoCity 
+# AutoCity - Theroy Of Computation.
 ## By: Adham Hijazi 
 ### Quickstart Guide:
 
@@ -16,7 +16,7 @@ uvicorn app.main:app --reload
 
 if http://127.0.0.1:8001 => Error 404 => Reading it before being loaded (No Problem).
 Check http://127.0.0.1:8001/health if == ok # Ready to go. else Find the error and fix it.
-go to http://127.0.0.1:8001/docs
+go to http://127.0.0.1:8001/docs # Swagger UI - RESTful API Designer.
 
 Ports: 8000 - 8001 # Use either of these just save the URL later in the Frontend UI.
 ```
@@ -37,6 +37,6 @@ Starting Endpoints:
 ```bash
 cd frontend
 npm install
-npm i -E d3@7.8.5 d3-graphviz@5.0.2 @hpcc-js/wasm@2.13.0 #Required to make visual graphs from DOT.
+npm i -E d3@7.8.5 d3-graphviz@5.0.2 @hpcc-js/wasm@2.13.0 # Required to make visual graphs from DOT - without it the frontend will crash.
 npm run dev
 ```

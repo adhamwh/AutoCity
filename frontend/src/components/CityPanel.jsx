@@ -29,6 +29,12 @@ export default function CityPanel() {
   // Initial load
   useEffect(() => { refresh(); }, [refresh]);
 
+  useEffect(() => {
+  const h = () => refresh();
+  window.addEventListener("autocity:refresh", h);
+  return () => window.removeEventListener("autocity:refresh", h);
+}, [])
+
   // 👇 Expose refresh so ChatPanel can call it after chat/intents
   useEffect(() => {
     window.__autocity_refresh = refresh;

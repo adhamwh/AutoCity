@@ -1,3 +1,4 @@
+// src/components/ChatPanel.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
 
@@ -14,75 +15,9 @@ const DEFAULT_LEXMAP = {
   select: ["vending_select", "select", "buy"],
 };
 
-// tiny helper
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-// ---- helpers ChatPanel uses to sync the left City UI ----
-async function refreshCity() {
-  try { await window.__autocity_refresh?.(); } catch {}
-}
-
-// Robust intent handlers: accept either single token (e.g. "traffic_next")
-// or split intent+arg (e.g. intent:"traffic", arg:"next")
-const INTENT_MAP = {
-  traffic_next   : async () => { await api.trafficEvent?.("timer"); },
-  elevator_up    : async () => { await api.elevatorEvent?.("call_up"); await api.elevatorEvent?.("arrive"); },
-  elevator_down  : async () => { await api.elevatorEvent?.("call_down"); await api.elevatorEvent?.("arrive"); },
-  vending_coin   : async (n = 1) => { await api.vendingEvent?.(`coin_${Number(n) || 1}`); },
-  vending_select : async () => { await api.vendingEvent?.("select"); },
-};
-
-async function applyIntent(intent, arg) {
-  // 1) Try exact match first
-  if (intent && INTENT_MAP[intent]) {
-    await INTENT_MAP[intent](arg);
-    await refreshCity();
-    return;
-  }
-
-  // 2) Try tolerant matching: "traffic"+"next", "elevator"+"up/down", "coin"/"select"
-  const i = String(intent || "").toLowerCase();
-  const a = String(arg || "").toLowerCase();
-
-  if (i.startsWith("traffic") && (a === "next" || a === "timer" || !a)) {
-    await api.trafficEvent?.("timer");
-    await refreshCity();
-    return;
-  }
-
-  if (i.startsWith("elevator")) {
-    if (a.includes("up")) {
-      await api.elevatorEvent?.("call_up");
-      await api.elevatorEvent?.("arrive");
-      await refreshCity();
-      return;
-    }
-    if (a.includes("down")) {
-      await api.elevatorEvent?.("call_down");
-      await api.elevatorEvent?.("arrive");
-      await refreshCity();
-      return;
-    }
-  }
-
-  if (i.startsWith("vending")) {
-    if (a.includes("coin")) {
-      const n = (a.match(/\d+/)?.[0]) || 1;
-      await api.vendingEvent?.(`coin_${n}`);
-      await refreshCity();
-      return;
-    }
-    if (a.includes("select")) {
-      await api.vendingEvent?.("select");
-      await refreshCity();
-      return;
-    }
-  }
-}
-
-
 export default function ChatPanel() {
-  // conversation
   const [msgs, setMsgs] = useState(() => {
     try { return JSON.parse(localStorage.getItem(LS_CHAT) || "[]"); }
     catch { return []; }
@@ -92,7 +27,7 @@ export default function ChatPanel() {
   const [error, setError] = useState("");
   const endRef = useRef(null);
 
-  // lexicon manager
+  // Lexicon manager
   const [lexText, setLexText] = useState(() => {
     try {
       const saved = localStorage.getItem(LS_LEX);
@@ -104,21 +39,18 @@ export default function ChatPanel() {
   const [lexOk, setLexOk] = useState(true);
   const [lexMsg, setLexMsg] = useState("");
 
-  // debug panel
+  // Debug
   const [debugOn, setDebugOn] = useState(false);
-  const [lastDebug, setLastDebug] = useState(null); // {intent,arg,hints?}
+  const [lastDebug, setLastDebug] = useState(null);
 
-  // auto-scroll
+  // Auto-scroll + persist chat
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
-
-  // persist chat minimal
   useEffect(() => { localStorage.setItem(LS_CHAT, JSON.stringify(msgs.slice(-50))); }, [msgs]);
 
-  // simple push helpers
   const push = (role, text, extra={}) => setMsgs(m => [...m, { role, text, ts: Date.now(), ...extra }]);
   const pushSystem = (text) => push("system", text);
 
-  // validate lex JSON without throwing
+  // Lex JSON validation
   const parsedLex = useMemo(() => {
     try {
       const j = JSON.parse(lexText);
@@ -131,7 +63,73 @@ export default function ChatPanel() {
     }
   }, [lexText]);
 
-  // send flow
+  const refreshCity = () => {
+    window.dispatchEvent(new CustomEvent("autocity:refresh"));
+  };
+
+  // Intent to API function map
+  const INTENT_MAP = {
+    traffic_next: async (_arg, suppress) => {
+      await api.trafficEvent("timer");
+      if (!suppress) push("assistant", "Traffic advanced");
+    },
+    elevator_up: async (_arg, suppress) => {
+      await api.elevatorEvent("call_up");
+      await api.elevatorEvent("arrive");
+      if (!suppress) push("assistant", "Elevator moved up");
+    },
+    elevator_down: async (_arg, suppress) => {
+      await api.elevatorEvent("call_down");
+      await api.elevatorEvent("arrive");
+      if (!suppress) push("assistant", "Elevator moved down");
+    },
+    vending_coin: async (n=1, suppress) => {
+      await api.vendingEvent(`coin_${n}`);
+      if (!suppress) push("assistant", `Inserted coin ${n} ✅`);
+    },
+    vending_select: async (_arg, suppress) => {
+      await api.vendingEvent("select");
+      if (!suppress) push("assistant", "Selected item ✅");
+    },
+  };
+
+  // Apply intent (backend or manual)
+  const applyIntent = async (intent, arg, { suppressMessage = false } = {}) => {
+    if (!intent) return false;
+    const fn = INTENT_MAP[intent];
+    if (!fn) return false;
+    await fn(arg, suppressMessage);
+    refreshCity();
+    return true;
+  };
+
+  // Fallback for raw text
+  const applyFallbackFromText = async (raw) => {
+    const T = (raw || "").toLowerCase();
+    if (T.includes("traffic") && (T.includes("next") || T.includes("advance") || T.includes("timer"))) {
+      await INTENT_MAP.traffic_next?.();
+      refreshCity();
+      return true;
+    }
+    if (T.includes("elevator") || T.includes("lift")) {
+      if (T.includes("up")) { await INTENT_MAP.elevator_up?.(); refreshCity(); return true; }
+      if (T.includes("down")) { await INTENT_MAP.elevator_down?.(); refreshCity(); return true; }
+    }
+    if (T.includes("coin")) {
+      const n = T.match(/\bcoin\s*(\d+)/)?.[1] || T.match(/\b(\d+)\s*coin/)?.[1] || 1;
+      await INTENT_MAP.vending_coin?.(n);
+      refreshCity();
+      return true;
+    }
+    if (T.includes("select") || T.includes("buy")) {
+      await INTENT_MAP.vending_select?.();
+      refreshCity();
+      return true;
+    }
+    return false;
+  };
+
+  // Send flow
   const send = async (text) => {
     if (!text?.trim() || busy) return;
     setError("");
@@ -139,23 +137,18 @@ export default function ChatPanel() {
     push("user", text);
 
     try {
-      // little typing delay so UI feels alive
       await sleep(120);
-
-      // IMPORTANT: pass a string, not {message:text}
       const res = await api.chat(text);
 
-      // res may be object/string — make robust
       const replyText =
         typeof res === "string" ? res :
-        res?.reply ?? JSON.stringify(res);
+        res?.reply ?? "";
+      if (replyText) push("assistant", replyText);
 
-      push("assistant", replyText);
-      // capture lightweight debug
+      let handled = await applyIntent(res?.intent, res?.arg, { suppressMessage: !!replyText });
       setLastDebug({ intent: res?.intent, arg: res?.arg, hints: res?.hints });
 
-      // If backend adds intent/arg, execute & refresh city UI
-      if (res?.intent) { await applyIntent(res.intent, res.arg); }
+      if (!handled) await applyFallbackFromText(text);
     } catch (e) {
       const msg = e?.message || String(e);
       setError(msg);
@@ -173,91 +166,33 @@ export default function ChatPanel() {
     }
   };
 
-  // quick actions -> call API directly (fallback to chat text), then refresh City
+  // Quick actions
   const qa = [
-  {
-    label: "Traffic → Next",
-    run: async () => {
-      try {
-        await api.trafficEvent("timer");
-        await refreshCity();
-        // make it visible in chat
-        setMsgs(m => [...m, { role: "assistant", text: "Traffic advanced ✅", ts: Date.now() }]);
-      } catch {
-        // fallback to chat path if API fails
-        await send("please advance the traffic light");
-      }
-    }
-  },
-  {
-    label: "Elevator ↑",
-    run: async () => {
-      try {
-        await api.elevatorEvent("call_up");
-        await api.elevatorEvent("arrive");
-        await refreshCity();
-        setMsgs(m => [...m, { role: "assistant", text: "Elevator moved up ✅", ts: Date.now() }]);
-      } catch {
-        await send("call the elevator up");
-      }
-    }
-  },
-  {
-    label: "Elevator ↓",
-    run: async () => {
-      try {
-        await api.elevatorEvent("call_down");
-        await api.elevatorEvent("arrive");
-        await refreshCity();
-        setMsgs(m => [...m, { role: "assistant", text: "Elevator moved down ✅", ts: Date.now() }]);
-      } catch {
-        await send("call the elevator down");
-      }
-    }
-  },
-  {
-    label: "Coin 2",
-    run: async () => {
-      try {
-        await api.vendingEvent("coin_2");
-        await refreshCity();
-        setMsgs(m => [...m, { role: "assistant", text: "Inserted coin 2 ✅", ts: Date.now() }]);
-      } catch {
-        await send("insert coin 2");
-      }
-    }
-  },
-  {
-    label: "Select",
-    run: async () => {
-      try {
-        await api.vendingEvent("select");
-        await refreshCity();
-        setMsgs(m => [...m, { role: "assistant", text: "Selected item ✅", ts: Date.now() }]);
-      } catch {
-        await send("select item");
-      }
-    }
-  },
-];
+    { label: "Traffic → Next", msg: "please advance the traffic light" },
+    { label: "Elevator ↑", msg: "call the elevator up" },
+    { label: "Elevator ↓", msg: "call the elevator down" },
+    { label: "Coin 2", msg: "insert coin 2" },
+    { label: "Select", msg: "select item" },
+  ];
 
-  // lexicon ops
+  // Lexicon ops
   const loadLexicon = async () => {
     if (!parsedLex) { setLexMsg("Fix JSON before loading."); setLexOk(false); return; }
     try {
-      const loader = api.chatLexiconLoad ?? api.chat_lexicon_load; // support either shim
-      const r = await loader({ lexmap: parsedLex });
+      const r = await api.loadLex(parsedLex);
       localStorage.setItem(LS_LEX, lexText);
       pushSystem(`Lexicon loaded (${r?.loaded ?? "?"}) ✅`);
     } catch (e) {
       pushSystem("Lexicon load failed ❌ " + (e?.message || e));
     }
   };
+
   const restoreDefaultLex = () => {
     const txt = JSON.stringify(DEFAULT_LEXMAP, null, 2);
     setLexText(txt);
     setLexOk(true); setLexMsg("");
   };
+
   const copyChat = async () => {
     try {
       const t = msgs.map(m => `[${new Date(m.ts).toLocaleTimeString()}] ${m.role}: ${m.text}`).join("\n");
@@ -269,7 +204,7 @@ export default function ChatPanel() {
   return (
     <div className="card">
       <div className="row gap">
-        {/* Left: Lexicon Manager */}
+        {/* Left: Lexicon */}
         <div className="col" style={{flex: "0 0 420px"}}>
           <div className="row items-center space-between">
             <h3 className="muted">Lexicon (DAFSA-backed)</h3>
@@ -305,7 +240,6 @@ export default function ChatPanel() {
                 <div className="bubble-text">{m.text}</div>
               </div>
             ))}
-
             {busy && (
               <div className="bubble assistant">
                 <div className="typing">
@@ -313,36 +247,31 @@ export default function ChatPanel() {
                 </div>
               </div>
             )}
-
-            {!!error && (
-              <div className="chip error">Network error — {error}</div>
-            )}
-
+            {!!error && <div className="chip error">Network error — {error}</div>}
             {debugOn && lastDebug && (
               <div className="debug">
                 <span>intent: <b>{String(lastDebug.intent || "–")}</b></span>
                 <span>arg: <b>{String(lastDebug.arg || "–")}</b></span>
               </div>
             )}
-
             <div ref={endRef} />
           </div>
 
-          {/* quick actions */}
+          {/* Quick actions */}
           <div className="row gap wrap" style={{marginTop: 8}}>
             {qa.map(q => (
               <button
                 key={q.label}
                 className="pill"
                 disabled={busy}
-                onClick={async () => { if (busy) return; setInput(""); setBusy(true); try { await q.run(); } finally { setBusy(false); } }}
+                onClick={() => { setInput(""); send(q.msg); }}
               >
                 {q.label}
               </button>
             ))}
           </div>
 
-          {/* composer */}
+          {/* Composer */}
           <div className="row gap" style={{marginTop: 12}}>
             <input
               className="grow"
@@ -351,7 +280,11 @@ export default function ChatPanel() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={onKeyDown}
             />
-            <button className="primary" onClick={() => { send(input); setInput(""); }} disabled={busy || !input.trim()}>
+            <button
+              className="primary"
+              onClick={() => { send(input); setInput(""); }}
+              disabled={busy || !input.trim()}
+            >
               {busy ? "Sending…" : "Send"}
             </button>
           </div>
