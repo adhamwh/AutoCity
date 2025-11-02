@@ -1,6 +1,6 @@
-# AutoCity (Backend-first Starter)
-
-## Quickstart
+# AutoCity 
+## By: Adham Hijazi 
+### Quickstart
 
 ```bash
 cd backend
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Endpoints:
+Starting Endpoints:
 - GET /api/health
 - POST /api/automata/dafsa/build
 - POST /api/automata/dafsa/add
