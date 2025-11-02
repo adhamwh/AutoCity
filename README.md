@@ -1,6 +1,6 @@
 # AutoCity 
 ## By: Adham Hijazi 
-### Quickstart Guide
+### Quickstart Guide:
 
 ```bash
 cd backend

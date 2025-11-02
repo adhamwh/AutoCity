@@ -29,3 +29,25 @@ export const api = {
   dafsaDot: () => j('GET', '/api/automata/dafsa/dot'),
   nfaToDfa: (payload) => j('POST', '/api/automata/nfa_to_dfa', payload),
 }
+
+
+// --- compatibility shims so UI code can call high-level helpers ---
+
+// optional: mirror the base-URL helpers some parts of the UI expect
+api.setBaseUrl = (url) => { localStorage.setItem('apiBase', url); window.location.reload(); };
+api.getBaseUrl = () => localStorage.getItem('apiBase') || 'http://127.0.0.1:8000';
+
+// Lexicon loader: ChatPanel may call api.chatLexiconLoad({lexmap}) or api.chat_lexicon_load(...)
+api.chatLexiconLoad = ({ lexmap }) => api.loadLex(lexmap);
+api.chat_lexicon_load = (payload) => api.chatLexiconLoad(payload);
+
+// FSM helpers used by quick-action buttons
+api.trafficNext   = ()         => api.trafficEvent('next');
+
+api.elevatorUp    = ()         => api.elevatorEvent('up');
+api.elevatorDown  = ()         => api.elevatorEvent('down');
+
+api.vendingCoin   = (n = 1)    => api.vendingEvent(`coin_${n}`);
+api.vendingSelect = ()         => api.vendingEvent('select');
+// (optionally) end a vend if you add a button later
+api.vendingDone   = ()         => api.vendingEvent('done');
