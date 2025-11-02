@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCity Dashboard</title>
+    <style>
+      :root {
+        --bg:#0b1020; --card:#111936; --fg:#eaf0ff; --muted:#9fb0d7; --acc:#6499ff;
+        --border:#22314f; --chip:#1a2550; --chip-border:#2a3b67;
+      }
+      * { box-sizing: border-box; }
+      body { margin:0; background:var(--bg); color:var(--fg);
+             font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; }
+      .wrap { max-width:1200px; margin:24px auto; padding:0 16px; display:grid; gap:16px; }
+      .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+      .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px;
+              box-shadow:0 6px 24px rgba(0,0,0,.25); }
+      .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+      .col { display:flex; flex-direction:column; gap:10px; }
+      input, textarea, select {
+        width:100%; background:#0d1430; color:var(--fg); border:1px solid var(--border);
+        border-radius:10px; padding:10px 12px; outline:none;
+      }
+      textarea { min-height:120px; }
+      button {
+        background:var(--acc); color:#061636; border:none; border-radius:10px; padding:10px 14px;
+        font-weight:700; cursor:pointer; transition: transform .05s ease, filter .1s ease;
+      }
+      button:hover { filter:brightness(1.07); }
+      button:active { transform:translateY(1px); }
+      button.secondary { background:#182654; color:var(--fg); }
+      pre { background:#0e1530; border:1px solid var(--border); border-radius:10px; padding:10px; overflow:auto; }
+      h2 { margin:0 0 12px 0; font-size:18px; }
+      small { color:var(--muted); }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .pill { display:inline-block; background:var(--chip); border:1px solid var(--chip-border);
+              border-radius:999px; padding:4px 10px; color:var(--muted); font-size:12px; }
+      header { padding:14px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+      a { color:#84c1ff; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

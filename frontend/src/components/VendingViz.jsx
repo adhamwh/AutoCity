@@ -1,0 +1,19 @@
+import React from "react";
+
+export default function VendingViz({ state="IDLE", credit=0 }) {
+  return (
+    <div style={{display:"flex", alignItems:"center", gap:16}}>
+      <div style={{width:140, border:"1px solid #2a355a", background:"#0e1530", borderRadius:12, padding:10}}>
+        <div style={{height:24, background:"#05102a", border:"1px solid #2a355a", borderRadius:6, marginBottom:8, padding:"2px 8px"}}>
+          <span style={{color:"#9fb0d7"}}>Credit: {credit}</span>
+        </div>
+        <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:6}}>
+          {["A1","A2","B1","B2","C1","C2"].map(k => (
+            <div key={k} style={{height:28, border:"1px solid #2a355a", borderRadius:6, background:"#15224a", display:"grid", placeItems:"center", color:"#9fb0d7"}}>{k}</div>
+          ))}
+        </div>
+      </div>
+      <div className="pill">Vending: {state}</div>
+    </div>
+  );
+}
