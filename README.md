@@ -45,5 +45,7 @@ Second Terminal:
 cd frontend
 npm install
 npm i -E d3@7.8.5 d3-graphviz@5.0.2 @hpcc-js/wasm@2.13.0 # Required to make visual graphs from DOT - without it the frontend will crash.
+npm install motion
+npm install ogl
 npm run dev
 ```

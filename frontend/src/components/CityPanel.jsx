@@ -3,6 +3,7 @@ import { api } from "../api";
 import TrafficLight from "./Trafficlight.jsx";
 import ElevatorViz from "./ElevatorViz.jsx";
 import VendingViz from "./VendingViz.jsx";
+import DecryptedText from "./DecryptedText.jsx";
 
 export default function CityPanel() {
   const [traffic, setTraffic] = useState("…");
@@ -45,7 +46,7 @@ export default function CityPanel() {
   return (
     <div className="col">
       <div className="row items-center space-between">
-        <h2>City Control</h2>
+        <h2><DecryptedText text="City Control" animateOn="both" revealDirection="center" speed={90} /></h2>
         <button className="pill" onClick={() => setShowExplain(true)}>How Does This Work?</button>
       </div>
 

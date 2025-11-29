@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import DecryptedText from "./DecryptedText.jsx";
 
 // Regex Runner mini-game (frontend-only, non-invasive)
 // Words arrive; player must accept/reject based on regex membership.
@@ -141,7 +142,7 @@ export default function RegexRunner() {
   return (
     <div className="card">
       <div className="row items-center space-between">
-        <h3 className="muted">Regex Runner</h3>
+        <h3 className="muted"><DecryptedText text="Regex Runner" animateOn="both" revealDirection="center" speed={90} /></h3>
         <div className="row gap-s">
           <span className="pill">Score: {score}</span>
           <span className="pill">Lives: {lives}</span>

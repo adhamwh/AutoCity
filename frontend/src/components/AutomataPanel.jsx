@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import DecryptedText from "./DecryptedText.jsx";
 import { api } from "../api";
 import DotViewer from "./DotViewer.jsx";
 
@@ -100,7 +101,7 @@ export default function AutomataPanel(){
   return (
     <div className="col">
       <div className="row items-center space-between">
-        <h2>Automata Lab</h2>
+        <h2><DecryptedText text="Automata Lab" animateOn="both" revealDirection="center" speed={90} /></h2>
         <button className="pill" onClick={() => setShowExplain(true)}>How Does This Work?</button>
       </div>
 

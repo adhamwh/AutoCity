@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import DecryptedText from "./DecryptedText.jsx";
 import { api } from "../api"; // not used but safe for future reuse
 
 // Simple deterministic PDA demo: balanced parentheses or a^n b^n.
@@ -180,7 +181,7 @@ export default function PdaLab() {
   return (
     <div className="card">
       <div className="row items-center space-between">
-        <h3 className="muted">PDA Lab (Balanced Parens / a^n b^n)</h3>
+        <h3 className="muted"><DecryptedText text="PDA Lab (Balanced Parens / a^n b^n)" animateOn="both" revealDirection="center" speed={90} /></h3>
         <div className="row gap-s">
           <button className="pill" onClick={() => onModeChange("parens")} disabled={mode === "parens"}>Parens</button>
           <button className="pill" onClick={() => onModeChange("anbn")} disabled={mode === "anbn"}>a^n b^n</button>

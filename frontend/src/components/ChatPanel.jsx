@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
+import DecryptedText from "./DecryptedText.jsx";
 
 /* ------------------ constants ------------------ */
 
@@ -246,7 +247,7 @@ export default function ChatPanel() {
         {/* Lexicon */}
         <div className="col" style={{ flex: "0 0 420px" }}>
           <div className="row items-center space-between">
-            <h3 className="muted">Lexicon (DAFSA-backed)</h3>
+            <h3 className="muted"><DecryptedText text="Lexicon (DAFSA-backed)" animateOn="both" revealDirection="center" speed={90} /></h3>
             <div className="row gap-s">
               <button className="pill" onClick={restoreDefaultLex}>Restore Default</button>
               <button className="pill" onClick={loadLexicon} disabled={!lexOk}>Load Lexicon</button>
@@ -266,7 +267,7 @@ export default function ChatPanel() {
         {/* Conversation */}
         <div className="col">
           <div className="row items-center space-between">
-            <h3 className="muted">Conversation</h3>
+            <h3 className="muted"><DecryptedText text="Conversation" animateOn="both" revealDirection="center" speed={90} /></h3>
             <div className="row gap-s">
               <button className="pill" onClick={() => setMsgs([])}>Clear</button>
               <button className="pill" onClick={copyChat}>Copy</button>

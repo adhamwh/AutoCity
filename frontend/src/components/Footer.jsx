@@ -1,11 +1,12 @@
 import React from "react";
+import DecryptedText from "./DecryptedText.jsx";
 
 export default function Footer() {
   return (
     <footer style={{ marginTop: 24, padding: "16px 0", borderTop: "1px solid #223" }}>
       <div className="wrap" style={{ maxWidth: 1200, display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "space-between" }}>
         <div className="col">
-          <strong>AutoCity - Theory of Computation Playground</strong>
+          <strong><DecryptedText text="AutoCity - Theory of Computation Playground" animateOn="both" revealDirection="center" speed={90} /></strong>
           <small className="muted">FSMs for traffic/elevator/vending - DAFSA lexicon - NFA/DFA - PDA Lab - Regex Runner</small>
           <small className="muted">Presented to Dr Mohammad Al Abed</small>
           <small className="muted">Course: COSC421</small>
