@@ -159,6 +159,7 @@ export default function PdaLab() {
   const [mode, setMode] = useState("parens");
   const [input, setInput] = useState(SAMPLE_PARENS_OK);
   const [cfg, setCfg] = useState(() => initialConfig(SAMPLE_PARENS_OK, "parens"));
+  const [showExplain, setShowExplain] = useState(false);
 
   const reset = (txt = input, m = mode) => setCfg(initialConfig(txt, m));
 
@@ -183,6 +184,7 @@ export default function PdaLab() {
         <div className="row gap-s">
           <button className="pill" onClick={() => onModeChange("parens")} disabled={mode === "parens"}>Parens</button>
           <button className="pill" onClick={() => onModeChange("anbn")} disabled={mode === "anbn"}>a^n b^n</button>
+          <button className="pill" onClick={() => setShowExplain(true)}>How Does This Work?</button>
         </div>
       </div>
 
@@ -237,6 +239,36 @@ export default function PdaLab() {
           </div>
         </div>
       </div>
+
+      {showExplain && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.55)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}>
+          <div className="card" style={{ maxWidth: 520, width: "100%", position: "relative" }}>
+            <button
+              className="pill"
+              style={{ position: "absolute", top: 12, right: 12 }}
+              onClick={() => setShowExplain(false)}
+            >
+              Close
+            </button>
+            <h3 className="muted">How Does This Work?</h3>
+            <div className="mono" style={{ lineHeight: 1.6 }}>
+              <p>A Pushdown Automaton (PDA) is like an NFA with a stack. The stack lets it recognize context-free languages.</p>
+              <p>In <b>Parens</b> mode, the PDA pushes “(” on the stack for every “(” read, and pops for “)”. Accept when input ends and only the bottom marker remains.</p>
+              <p>In <b>a^n b^n</b> mode, it pushes a symbol for each “a”, then pops for each “b”. Accept when input ends, the stack is back to the bottom marker, and both a and b were seen.</p>
+              <p>Acceptance here is by empty stack (and end of input). The status pill shows accept/reject; the stack view shows pushes/pops; the steps log lists each transition-like action.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
