@@ -1,4 +1,4 @@
-# AutoCity - Theroy Of Computation.
+# AutoCity - Theory Of Computation.
 ## By: Adham Hijazi 
 ### Quickstart Guide:
 
