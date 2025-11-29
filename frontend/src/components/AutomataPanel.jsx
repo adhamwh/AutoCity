@@ -39,6 +39,7 @@ export default function AutomataPanel(){
   const [nfa, setNfa] = useState(JSON.stringify(sampleNFA, null, 2));
   const [dfaOut, setDfaOut] = useState("");
   const [dfaDot, setDfaDot] = useState("");
+  const [showExplain, setShowExplain] = useState(false);
 
   // keep svg handles for export
   const dafsaSvgRef = useRef(null);
@@ -98,7 +99,10 @@ export default function AutomataPanel(){
 
   return (
     <div className="col">
-      <h2>Automata Lab</h2>
+      <div className="row items-center space-between">
+        <h2>Automata Lab</h2>
+        <button className="pill" onClick={() => setShowExplain(true)}>How Does This Work?</button>
+      </div>
 
       <div className="grid" style={{gridTemplateColumns:"1fr 1fr"}}>
         <div className="col">
@@ -134,6 +138,36 @@ export default function AutomataPanel(){
           <DotViewer dot={dfaDot} onReadySvg={(svg)=> (dfaSvgRef.current = svg)} />
         </div>
       </div>
+
+      {showExplain && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.55)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}>
+          <div className="card" style={{ maxWidth: 520, width: "100%", position: "relative" }}>
+            <button
+              className="pill"
+              style={{ position: "absolute", top: 12, right: 12 }}
+              onClick={() => setShowExplain(false)}
+            >
+              Close
+            </button>
+            <h3 className="muted">How Does This Work?</h3>
+            <div className="mono" style={{ lineHeight: 1.6 }}>
+              <p><b>DAFSA</b>: Builds a Deterministic Acyclic Finite State Automaton from the word list. Sorting and incremental insert yield a compact trie-like automaton; minimization merges equivalent suffixes. Acceptance is by reaching a final state.</p>
+              <p><b>NFA → DFA</b>: The JSON on the left defines an NFA (states, alphabet, start, finals, transitions). The subset construction produces an equivalent DFA, rendered on the right. Acceptance is by ending in any DFA state that includes an original NFA final.</p>
+              <p><b>DOT & exports</b>: Graphs are rendered from DOT via Graphviz in the browser; you can export SVG/PNG snapshots.</p>
+              <p>Core ToC ideas: regular languages, deterministic vs non-deterministic automata, language equivalence via NFA→DFA, and state minimization for compact DAFSAs.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

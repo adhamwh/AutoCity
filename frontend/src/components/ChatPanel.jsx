@@ -43,6 +43,7 @@ export default function ChatPanel() {
   });
   const [lexOk, setLexOk] = useState(true);
   const [lexMsg, setLexMsg] = useState("");
+  const [showLexExplain, setShowLexExplain] = useState(false);
 
   /* debug -------------------------------------------------------- */
   const [debugOn, setDebugOn] = useState(false);
@@ -249,6 +250,7 @@ export default function ChatPanel() {
             <div className="row gap-s">
               <button className="pill" onClick={restoreDefaultLex}>Restore Default</button>
               <button className="pill" onClick={loadLexicon} disabled={!lexOk}>Load Lexicon</button>
+              <button className="pill" onClick={() => setShowLexExplain(true)}>How Does This Work?</button>
             </div>
           </div>
           <textarea
@@ -327,6 +329,36 @@ export default function ChatPanel() {
           </div>
         </div>
       </div>
+
+      {showLexExplain && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.55)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}>
+          <div className="card" style={{ maxWidth: 520, width: "100%", position: "relative" }}>
+            <button
+              className="pill"
+              style={{ position: "absolute", top: 12, right: 12 }}
+              onClick={() => setShowLexExplain(false)}
+            >
+              Close
+            </button>
+            <h3 className="muted">How Do Lexicon & Chat Work?</h3>
+            <div className="mono" style={{ lineHeight: 1.6 }}>
+              <p><b>Lexicon (DAFSA)</b>: The JSON maps keywords to intent labels (e.g., “traffic” → traffic intent). When you load it, the backend builds a minimized DAFSA so lookups are fast and compact; queries walk the automaton to suggest hints.</p>
+              <p><b>Chat flow</b>: Your message goes to the API. The parser uses patterns (NFA/DFA-style intent matcher) plus lexicon hints to pick an intent (traffic_next, elevator_up, vending_coin, etc.). It returns a reply and intent.</p>
+              <p><b>Actions</b>: The client executes the intent locally (sending FSM events like timer/call_up/coin) and refreshes the city state. That’s why the traffic light, elevator, or vending machine updates after chat/quick actions.</p>
+              <p>Core ToC pieces: DAFSA for lexicon lookup, NFAs/DFAs for intent recognition, and deterministic FSMs for city devices. Acceptance/rejection of patterns drives which intent fires.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import CityPanel from "./components/CityPanel.jsx";
 import AutomataPanel from "./components/AutomataPanel.jsx";
 import PdaLab from "./components/PdaLab.jsx";
 import RegexRunner from "./components/RegexRunner.jsx";
+import Footer from "./components/Footer.jsx";
 
 export default function App() {
   const [base, setBase] = useState(localStorage.getItem("apiBase") || "http://127.0.0.1:8000");
@@ -36,6 +37,7 @@ export default function App() {
         <div className="card"><PdaLab/></div>
         <div className="card"><RegexRunner/></div>
       </div>
+      <Footer />
     </div>
   );
 }

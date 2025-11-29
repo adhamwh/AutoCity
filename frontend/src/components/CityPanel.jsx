@@ -8,6 +8,7 @@ export default function CityPanel() {
   const [traffic, setTraffic] = useState("…");
   const [elev, setElev]     = useState({ state: "…", floor: 0 });
   const [vend, setVend]     = useState({ state: "…", credit: 0 });
+  const [showExplain, setShowExplain] = useState(false);
 
   // Refresh all panels (parallel) + safe setters
   const refresh = useCallback(async () => {
@@ -43,7 +44,10 @@ export default function CityPanel() {
 
   return (
     <div className="col">
-      <h2>City Control</h2>
+      <div className="row items-center space-between">
+        <h2>City Control</h2>
+        <button className="pill" onClick={() => setShowExplain(true)}>How Does This Work?</button>
+      </div>
 
       <div className="card" style={{ background: "transparent", border: "1px dashed var(--border)" }}>
         <div className="row" style={{ justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
@@ -112,6 +116,31 @@ export default function CityPanel() {
           </div>
         </div>
       </div>
+
+      {showExplain && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.55)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+        }}>
+          <div className="card" style={{ maxWidth: 520, width: "100%", position: "relative" }}>
+            <button
+              className="pill"
+              style={{ position: "absolute", top: 12, right: 12 }}
+              onClick={() => setShowExplain(false)}
+            >
+              Close
+            </button>
+            <h3 className="muted">How Does This Work?</h3>
+            <div className="mono" style={{ lineHeight: 1.6 }}><p><b>Traffic Light</b>: Deterministic FSM with states like RED/GREEN/YELLOW. The <code>timer</code> event advances the state; trigger it with the button or via chat intent.</p><p><b>Elevator</b>: FSM with states such as DOORS_OPEN/MOVING_UP/MOVING_DOWN. Events (call_up, call_down, arrive, close) drive transitions; buttons fire events; the visual tracks state/floor.</p><p><b>Vending</b>: FSM that tracks credit and vend cycles. Coin events add credit; select/done drive transitions like DISPENSE/IDLE.</p><p>Each control sends an event to its FSM through the API, then the UI refreshes to show the current state.</p></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
