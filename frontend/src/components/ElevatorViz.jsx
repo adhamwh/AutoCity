@@ -1,8 +1,12 @@
 import React from "react";
 
 export default function ElevatorViz({ state = "IDLE", floor = 0 }) {
-  // floors assumed 0..2; tweak spacing if you add more
-  const y = 8 + floor * 60;
+  const unit = 60;
+  const base = 8;
+  const safeFloor = Math.max(0, floor || 0);
+  const maxFloor = Math.max(2, safeFloor);
+  const height = Math.max(200, base + (maxFloor + 1) * unit);
+  const y = base + safeFloor * unit;
 
   return (
     <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
@@ -10,7 +14,7 @@ export default function ElevatorViz({ state = "IDLE", floor = 0 }) {
         style={{
           position: "relative",
           width: 100,
-          height: 200,
+          height,
           border: "1px solid #2a355a",
           borderRadius: 12,
           background: "#0e1530",
@@ -18,7 +22,7 @@ export default function ElevatorViz({ state = "IDLE", floor = 0 }) {
         }}
       >
         {/* floor guides */}
-        {[8, 68, 128].map((b, i) => (
+        {Array.from({ length: maxFloor + 1 }, (_ , i) => base + i * unit).map((b, i) => (
           <div
             key={i}
             style={{

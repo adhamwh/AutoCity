@@ -3,6 +3,7 @@ import { api, setApiBase } from "./api";
 import ChatPanel from "./components/ChatPanel.jsx";
 import CityPanel from "./components/CityPanel.jsx";
 import AutomataPanel from "./components/AutomataPanel.jsx";
+import PdaLab from "./components/PdaLab.jsx";
 
 export default function App() {
   const [base, setBase] = useState(localStorage.getItem("apiBase") || "http://127.0.0.1:8000");
@@ -31,6 +32,7 @@ export default function App() {
         </div>
 
         <div className="card"><AutomataPanel/></div>
+        <div className="card"><PdaLab/></div>
       </div>
     </div>
   );
