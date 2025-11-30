@@ -1,5 +1,5 @@
 # AutoCity - Theory Of Computation.
-## By: Adham Hijazi 
+
 ### Quickstart Guide:
 
 ```bash
